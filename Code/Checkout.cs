@@ -4,12 +4,12 @@ namespace Code
 {
     public class Checkout
     {
-        public Checkout(IObservable<string> scannedItems, Action<int> onItem)
+        public Checkout(IObservable<string> sequenceOfItems, Action<int> onTotalChange)
         {
-            var subscription = scannedItems.Subscribe(
-                item => onItem(50),
-                () => { });
-            //subscription.Dispose();
+            var subscription = sequenceOfItems.Subscribe(
+                _ => onTotalChange(50),
+                _ => { /* onError */ },
+                () => { /* onCompleted */ });
         }
     }
 }

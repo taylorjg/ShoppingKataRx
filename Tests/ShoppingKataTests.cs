@@ -12,12 +12,12 @@ namespace Tests
         {
             // Arrange
             var total = 0;
-            var scannedItems = new Subject<string>();
-            var checkout = new Checkout(scannedItems, t => total = t);
+            var sequenceOfItems = new Subject<string>();
+            var checkout = new Checkout(sequenceOfItems, newTotal => total = newTotal);
 
             // Act
-            scannedItems.OnNext("A");
-            scannedItems.OnCompleted();
+            sequenceOfItems.OnNext("A");
+            sequenceOfItems.OnCompleted();
 
             // Assert
             Assert.That(total, Is.EqualTo(50));
