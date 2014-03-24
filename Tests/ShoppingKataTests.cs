@@ -17,7 +17,7 @@ namespace Tests
 
             // Act
             var checkout = new Checkout();
-            checkout.ProcessSequenceOfItems(sequenceOfItems, newTotal => total = newTotal);
+            checkout.ProcessSequenceOfItems(sequenceOfItems, totalDelta => total += totalDelta);
             checkout.Reset();
 
             // Assert

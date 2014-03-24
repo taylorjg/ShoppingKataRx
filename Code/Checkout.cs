@@ -6,10 +6,10 @@ namespace Code
     {
         private IDisposable _subscription;
 
-        public void ProcessSequenceOfItems(IObservable<string> sequenceOfItems, Action<int> onTotalChange)
+        public void ProcessSequenceOfItems(IObservable<string> sequenceOfItems, Action<int> onTotalDelta)
         {
             _subscription = sequenceOfItems.Subscribe(
-                _ => onTotalChange(50),
+                _ => onTotalDelta(50),
                 _ => { /* onError */ },
                 () => { /* onCompleted */ });
         }

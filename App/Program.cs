@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -9,17 +8,15 @@ namespace App
 {
     internal class Program
     {
-        private static bool _enableLogging = false;
+        private static bool _enableLogging;
 
         private static void Main(string[] args)
         {
-            if (args.LastOrDefault(arg => arg == "-log") != null)
-            {
-                _enableLogging = true;
-            }
+            _enableLogging = (args.LastOrDefault(arg => arg == "-log") != null);
 
-            var sequenceOfItems = (args.Any(arg => !arg.StartsWith("-")))
-                                      ? CreateSequenceOfItemsOverCommandLineArgument(args)
+            var listOfItemsFromCommandLine = args.FirstOrDefault(arg => !arg.StartsWith("-"));
+            var sequenceOfItems = (listOfItemsFromCommandLine != null)
+                                      ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
                                       : CreateSequenceOfItemsOverAsyncConsoleReadLoop();
 
             var checkout = new Checkout();
@@ -33,12 +30,12 @@ namespace App
             Console.WriteLine("Total = {0}.", total);
         }
 
-        private static IObservable<string> CreateSequenceOfItemsOverCommandLineArgument(IList<string> args)
+        private static IObservable<string> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
         {
             using (new LogEntryExit("CreateSequenceOfItemsOverCommandLineArgument"))
             {
                 var sequenceOfItems = new ReplaySubject<string>();
-                foreach (var item in args[0].Select(c => Convert.ToString(c)))
+                foreach (var item in listOfItemsFromCommandLine.Select(c => Convert.ToString(c)))
                 {
                     sequenceOfItems.OnNext(item);
                 }
@@ -95,13 +92,6 @@ namespace App
                     }
                 }
             }
-        }
-
-        private static void Usage()
-        {
-            Console.Error.WriteLine("App [ <list of items> ] [ -log ]");
-            Console.Error.WriteLine("    e.g. App AABC");
-            Environment.Exit(1);
         }
 
         private static void Log(string format, params object[] args)
