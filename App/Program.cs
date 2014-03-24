@@ -9,14 +9,16 @@ namespace App
 {
     internal class Program
     {
+        private static bool _enableLogging = false;
+
         private static void Main(string[] args)
         {
-            if (args.Length > 1)
+            if (args.LastOrDefault(arg => arg == "-log") != null)
             {
-                Usage();
+                _enableLogging = true;
             }
 
-            var sequenceOfItems = (args.Length == 1)
+            var sequenceOfItems = (args.Any(arg => !arg.StartsWith("-")))
                                       ? CreateSequenceOfItemsOverCommandLineArgument(args)
                                       : CreateSequenceOfItemsOverAsyncConsoleReadLoop();
 
@@ -97,14 +99,17 @@ namespace App
 
         private static void Usage()
         {
-            Console.Error.WriteLine("App [ <list of items> ]");
+            Console.Error.WriteLine("App [ <list of items> ] [ -log ]");
             Console.Error.WriteLine("    e.g. App AABC");
             Environment.Exit(1);
         }
 
         private static void Log(string format, params object[] args)
         {
-            Console.WriteLine(format, args);
+            if (_enableLogging)
+            {
+                Console.WriteLine(format, args);
+            }
         }
 
         private class LogEntryExit : IDisposable
