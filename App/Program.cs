@@ -17,7 +17,7 @@ namespace App
             var listOfItemsFromCommandLine = args.FirstOrDefault(arg => !arg.StartsWith("-"));
             var sequenceOfItems = (listOfItemsFromCommandLine != null)
                                       ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
-                                      : CreateSequenceOfItemsOverAsyncConsoleReadLoop();
+                                      : CreateSequenceOfItemsOverConsoleReadLoop();
 
             var checkout = new Checkout();
             var total = 0;
@@ -44,26 +44,26 @@ namespace App
             }
         }
 
-        private static IObservable<string> CreateSequenceOfItemsOverAsyncConsoleReadLoop()
+        private static IObservable<string> CreateSequenceOfItemsOverConsoleReadLoop()
         {
-            using (new LogEntryExit("CreateSequenceOfItemsOverAsyncConsoleReadLoop"))
+            using (new LogEntryExit("CreateSequenceOfItemsOverConsoleReadLoop"))
             {
                 return Observable.Create<string>(observer =>
                 {
                     using (new LogEntryExit("Observable.Create()'s subscribe lambda"))
                     {
-                        Log("Calling ConsoleKeyPressReadLoop()...");
-                        ConsoleKeyPressReadLoop(observer);
-                        Log("...returned from ConsoleKeyPressReadLoop()");
+                        Log("Calling ConsoleReadLoopAsync()...");
+                        ConsoleReadLoopAsync(observer);
+                        Log("...returned from ConsoleReadLoopAsync()");
                         return () => Log("Inside the subscription dispose action");
                     }
                 });
             }
         }
 
-        private async static void ConsoleKeyPressReadLoop(IObserver<string> observer)
+        private async static void ConsoleReadLoopAsync(IObserver<string> observer)
         {
-            using (new LogEntryExit("ConsoleKeyPressReadLoop"))
+            using (new LogEntryExit("ConsoleReadLoopAsync"))
             {
                 for (; ; )
                 {
