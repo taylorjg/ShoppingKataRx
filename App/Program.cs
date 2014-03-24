@@ -35,7 +35,9 @@ namespace App
             using (new LogEntryExit("CreateSequenceOfItemsOverCommandLineArgument"))
             {
                 var sequenceOfItems = new ReplaySubject<string>();
-                foreach (var item in listOfItemsFromCommandLine.Select(c => Convert.ToString(c)))
+                foreach (var item in listOfItemsFromCommandLine
+                    .Where(c => !Char.IsWhiteSpace(c))
+                    .Select(c => Convert.ToString(c)))
                 {
                     sequenceOfItems.OnNext(item);
                 }
@@ -80,6 +82,11 @@ namespace App
 
                     foreach (var keyPress in line)
                     {
+                        if (Char.IsWhiteSpace(keyPress))
+                        {
+                            continue;
+                        }
+
                         if (keyPress == 'Q' || keyPress == 'q')
                         {
                             Log("Calling observer.OnCompleted() due to '{0}'", keyPress);
