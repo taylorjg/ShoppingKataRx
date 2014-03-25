@@ -12,6 +12,7 @@ namespace Code
                 _ => onTotalDelta(50),
                 _ => { /* onError */ },
                 () => { /* onCompleted */ });
+            // return total
         }
 
         public void Reset()
