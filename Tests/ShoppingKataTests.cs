@@ -13,13 +13,11 @@ namespace Tests
         public void SingleItemHasTheCorrectPrice()
         {
             // Arrange
-            var total = 0;
             var sequenceOfItems = BuildSequenceOfItems("A");
 
             // Act
             var checkout = new Checkout();
-            checkout.ProcessSequenceOfItems(sequenceOfItems, totalDelta => total += totalDelta);
-            checkout.Reset();
+            var total = checkout.ProcessSequenceOfItems(sequenceOfItems);
 
             // Assert
             Assert.That(total, Is.EqualTo(50));

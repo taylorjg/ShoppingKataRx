@@ -4,24 +4,32 @@ namespace Code
 {
     public class Checkout
     {
-        private IDisposable _subscription;
-
-        public void ProcessSequenceOfItems(IObservable<string> sequenceOfItems, Action<int> onTotalDelta)
+        public int ProcessSequenceOfItems(IObservable<string> sequenceOfItems)
         {
-            _subscription = sequenceOfItems.Subscribe(
-                _ => onTotalDelta(50),
+            var total = 0;
+            var subscription = sequenceOfItems.Subscribe(
+                item => total += LookupItem(item),
                 _ => { /* onError */ },
                 () => { /* onCompleted */ });
-            // return total
+            subscription.Dispose();
+            return total;
         }
 
-        public void Reset()
+        private int LookupItem(string item)
         {
-            if (_subscription != null)
+            switch (item.ToUpper()[0])
             {
-                _subscription.Dispose();
-                _subscription = null;
+                case 'A':
+                    return 50;
+                case 'B':
+                    return 30;
+                case 'C':
+                    return 20;
+                case 'D':
+                    return 15;
             }
+
+            return 0;
         }
     }
 }

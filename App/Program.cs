@@ -20,14 +20,7 @@ namespace App
                                       : CreateSequenceOfItemsOverConsoleReadLoop();
 
             var checkout = new Checkout();
-            var total = 0;
-            checkout.ProcessSequenceOfItems(sequenceOfItems, totalDelta =>
-                {
-                    total += totalDelta;
-                    Console.WriteLine("totalDelta: {0}", totalDelta);
-                    Console.WriteLine("total: {0}", total);
-                });
-            checkout.Reset();
+            var total = checkout.ProcessSequenceOfItems(sequenceOfItems);
             Console.WriteLine("Total = {0}.", total);
         }
 
