@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive.Linq;
 using Code;
 using NUnit.Framework;
@@ -23,9 +22,9 @@ namespace Tests
             Assert.That(total, Is.EqualTo(50));
         }
 
-        private static IObservable<string> BuildSequenceOfItems(string items)
+        private static IObservable<char> BuildSequenceOfItems(string items)
         {
-            return items.Select(c => Convert.ToString(c)).ToObservable();
+            return items.ToObservable();
         }
     }
 }

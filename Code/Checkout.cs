@@ -4,7 +4,7 @@ namespace Code
 {
     public class Checkout
     {
-        public int ProcessSequenceOfItems(IObservable<string> sequenceOfItems)
+        public int ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var total = 0;
             var subscription = sequenceOfItems.Subscribe(
@@ -15,9 +15,9 @@ namespace Code
             return total;
         }
 
-        private int LookupItem(string item)
+        private static int LookupItem(char item)
         {
-            switch (item.ToUpper()[0])
+            switch (Char.ToUpper(item))
             {
                 case 'A':
                     return 50;
@@ -29,7 +29,7 @@ namespace Code
                     return 15;
             }
 
-            return 0;
+            throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
         }
     }
 }

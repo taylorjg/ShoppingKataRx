@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Code;
 
 namespace App
@@ -20,31 +19,23 @@ namespace App
                                       : CreateSequenceOfItemsOverConsoleReadLoop();
 
             var checkout = new Checkout();
-            var total = checkout.ProcessSequenceOfItems(sequenceOfItems);
+            var total = checkout.ProcessSequenceOfItems(sequenceOfItems.Where(c => !Char.IsWhiteSpace(c)));
             Console.WriteLine("Total = {0}.", total);
         }
 
-        private static IObservable<string> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
+        private static IObservable<char> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
         {
             using (new LogEntryExit("CreateSequenceOfItemsOverCommandLineArgument"))
             {
-                var sequenceOfItems = new ReplaySubject<string>();
-                foreach (var item in listOfItemsFromCommandLine
-                    .Where(c => !Char.IsWhiteSpace(c))
-                    .Select(c => Convert.ToString(c)))
-                {
-                    sequenceOfItems.OnNext(item);
-                }
-                sequenceOfItems.OnCompleted();
-                return sequenceOfItems;
+                return listOfItemsFromCommandLine.ToObservable();
             }
         }
 
-        private static IObservable<string> CreateSequenceOfItemsOverConsoleReadLoop()
+        private static IObservable<char> CreateSequenceOfItemsOverConsoleReadLoop()
         {
             using (new LogEntryExit("CreateSequenceOfItemsOverConsoleReadLoop"))
             {
-                return Observable.Create<string>(observer =>
+                return Observable.Create<char>(observer =>
                 {
                     using (new LogEntryExit("Observable.Create()'s subscribe lambda"))
                     {
@@ -57,15 +48,15 @@ namespace App
             }
         }
 
-        private static void ConsoleReadLoop(IObserver<string> observer)
+        private static void ConsoleReadLoop(IObserver<char> observer)
         {
             using (new LogEntryExit("ConsoleReadLoop"))
             {
                 for (; ; )
                 {
-                    Log("Calling Console.In.ReadLine()");
-                    var line = Console.In.ReadLine();
-                    Log("...after await Console.In.ReadLine()");
+                    Log("Calling Console.ReadLine()");
+                    var line = Console.ReadLine();
+                    Log("...after await Console.ReadLine()");
 
                     if (string.IsNullOrEmpty(line))
                     {
@@ -76,11 +67,6 @@ namespace App
 
                     foreach (var keyPress in line)
                     {
-                        if (Char.IsWhiteSpace(keyPress))
-                        {
-                            continue;
-                        }
-
                         if (keyPress == 'Q' || keyPress == 'q')
                         {
                             Log("Calling observer.OnCompleted() due to '{0}'", keyPress);
@@ -89,7 +75,7 @@ namespace App
                         }
 
                         Log("Calling observer.OnNext('{0}')", keyPress);
-                        observer.OnNext(Convert.ToString(keyPress));
+                        observer.OnNext(keyPress);
                     }
                 }
             }
