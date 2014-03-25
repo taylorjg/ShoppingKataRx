@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 
 namespace Code
 {
@@ -7,8 +8,11 @@ namespace Code
         public int ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var total = 0;
-            var subscription = sequenceOfItems.Subscribe(
-                item => total += LookupItem(item),
+
+            var itemsAndCounts = sequenceOfItems.Select(c => Tuple.Create(c, 0));
+
+            var subscription = itemsAndCounts.Subscribe(
+                x => total += LookupItem(x.Item1),
                 _ => { /* onError */ },
                 () => { /* onCompleted */ });
             subscription.Dispose();
