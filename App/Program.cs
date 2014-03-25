@@ -19,7 +19,9 @@ namespace App
                                       : CreateSequenceOfItemsOverConsoleReadLoop();
 
             var checkout = new Checkout();
-            var total = checkout.ProcessSequenceOfItems(sequenceOfItems.Where(c => !Char.IsWhiteSpace(c)));
+            var task = checkout.ProcessSequenceOfItems(sequenceOfItems.Where(c => !Char.IsWhiteSpace(c)));
+            task.Wait();
+            var total = task.Result;
             Console.WriteLine("Total = {0}.", total);
         }
 

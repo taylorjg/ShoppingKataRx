@@ -16,14 +16,14 @@ namespace Tests
         [TestCase("b", 30)]
         [TestCase("c", 20)]
         [TestCase("d", 15)]
-        public void SingleItemHasTheCorrectPrice(string itemsString, int expectedTotal)
+        public async void SingleItemHasTheCorrectPrice(string itemsString, int expectedTotal)
         {
             // Arrange
             var sequenceOfItems = BuildSequenceOfItems(itemsString);
 
             // Act
             var checkout = new Checkout();
-            var total = checkout.ProcessSequenceOfItems(sequenceOfItems);
+            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
 
             // Assert
             Assert.That(total, Is.EqualTo(expectedTotal));
