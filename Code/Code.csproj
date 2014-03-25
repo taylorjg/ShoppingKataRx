@@ -54,8 +54,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Checkout.cs" />
+    <Compile Include="Discounter.cs" />
     <Compile Include="ItemCounter.cs" />
+    <Compile Include="Pricer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Totaller.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

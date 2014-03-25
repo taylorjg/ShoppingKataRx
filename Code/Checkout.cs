@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
 
 namespace Code
 {
@@ -8,33 +7,31 @@ namespace Code
         public int ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var total = 0;
-            var itemCounter = new ItemCounter();
 
-            var itemsAndCounts = sequenceOfItems.Select(itemCounter.IncrementItemCountForItem);
+            // 2 subscribers
+            // - to lookup price => sequence of price (int)
+            //  - Pricer
+            // - to apply discount => sequence of discount (int)
+            //  - Discounter + ItemCounter
+            var pricer = new Pricer();
+            var prices = pricer.PriceSequenceOfItems(sequenceOfItems);
+            var discounter = new Discounter();
 
-            var subscription = itemsAndCounts.Subscribe(
-                x => total += LookupItem(x.Item1),
-                _ => { /* onError */ },
-                () => { /* onCompleted */ });
+            // merge the 2 sequences of prices
+            // sum all the values together
+            // Merge, Sum
+            // - Totaller
+            //var totaller = new Totaller();
+
+            var subscription = prices.Subscribe(price => total += price);
+
+            // The observables that I have used so far (in unit tests and the
+            // console app) seem to block when I call Subscribe above. But I
+            // guess this might not necessarily be the case. How should I
+            // handle disposing of the subscription more generally ?
             subscription.Dispose();
+
             return total;
-        }
-
-        private static int LookupItem(char item)
-        {
-            switch (Char.ToUpper(item))
-            {
-                case 'A':
-                    return 50;
-                case 'B':
-                    return 30;
-                case 'C':
-                    return 20;
-                case 'D':
-                    return 15;
-            }
-
-            throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
         }
     }
 }
