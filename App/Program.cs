@@ -23,8 +23,9 @@ namespace App
             var total = 0;
             checkout.ProcessSequenceOfItems(sequenceOfItems, totalDelta =>
                 {
-                    Log("totalDelta: {0}", totalDelta);
                     total += totalDelta;
+                    Console.WriteLine("totalDelta: {0}", totalDelta);
+                    Console.WriteLine("total: {0}", total);
                 });
             checkout.Reset();
             Console.WriteLine("Total = {0}.", total);
@@ -54,28 +55,28 @@ namespace App
                 {
                     using (new LogEntryExit("Observable.Create()'s subscribe lambda"))
                     {
-                        Log("Calling ConsoleReadLoopAsync()...");
-                        ConsoleReadLoopAsync(observer);
-                        Log("...returned from ConsoleReadLoopAsync()");
+                        Log("Calling ConsoleReadLoop()...");
+                        ConsoleReadLoop(observer);
+                        Log("...returned from ConsoleReadLoop()");
                         return () => Log("Inside the subscription dispose action");
                     }
                 });
             }
         }
 
-        private async static void ConsoleReadLoopAsync(IObserver<string> observer)
+        private static void ConsoleReadLoop(IObserver<string> observer)
         {
-            using (new LogEntryExit("ConsoleReadLoopAsync"))
+            using (new LogEntryExit("ConsoleReadLoop"))
             {
                 for (; ; )
                 {
-                    Log("Calling await Console.In.ReadLineAsync()");
-                    var line = await Console.In.ReadLineAsync();
-                    Log("...after await Console.In.ReadLineAsync() - line.Length: {0}", line.Length);
+                    Log("Calling Console.In.ReadLine()");
+                    var line = Console.In.ReadLine();
+                    Log("...after await Console.In.ReadLine()");
 
-                    if (line.Length == 0)
+                    if (string.IsNullOrEmpty(line))
                     {
-                        Log("Calling observer.OnCompleted() due to empty line");
+                        Log("Calling observer.OnCompleted() due to line being null or empty");
                         observer.OnCompleted();
                         return;
                     }
