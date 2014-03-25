@@ -8,8 +8,9 @@ namespace Code
         public int ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var total = 0;
+            var itemCounter = new ItemCounter();
 
-            var itemsAndCounts = sequenceOfItems.Select(c => Tuple.Create(c, 0));
+            var itemsAndCounts = sequenceOfItems.Select(itemCounter.IncrementItemCountForItem);
 
             var subscription = itemsAndCounts.Subscribe(
                 x => total += LookupItem(x.Item1),
