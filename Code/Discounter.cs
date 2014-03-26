@@ -15,8 +15,8 @@ namespace Code
 
         private static Tuple<string, int> DiscountItem(char item, ItemCounter itemCounter)
         {
-            int discount;
             int triggerQuantity;
+            int discount;
 
             switch (item)
             {
@@ -37,7 +37,7 @@ namespace Code
             var newItemCount = itemCounter.IncrementItemCountForItem(item);
             if (newItemCount % triggerQuantity == 0)
             {
-                var discountDescription = (discount != 0) ? string.Format("{0} '{1}'s", triggerQuantity, item) : string.Empty;
+                var discountDescription = string.Format("{0} '{1}'s", triggerQuantity, item);
                 return Tuple.Create(discountDescription, -discount);
             }
 
