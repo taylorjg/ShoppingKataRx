@@ -8,8 +8,11 @@ namespace Code
         public IObservable<int> DiscountSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var itemCounter = new ItemCounter();
-            return sequenceOfItems.Select(item =>
-                {
+            return sequenceOfItems.Select(item => DiscountItem(item, itemCounter));
+        }
+
+        private static int DiscountItem(char item, ItemCounter itemCounter)
+        {
                     var discount = 0;
                     var newItemCount = itemCounter.IncrementItemCountForItem(item);
 
@@ -25,7 +28,6 @@ namespace Code
                     }
 
                     return discount;
-                });
         }
     }
 }
