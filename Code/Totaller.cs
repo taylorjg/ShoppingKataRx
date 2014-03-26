@@ -15,7 +15,10 @@ namespace Code
                 .Select(x =>
                     {
                         runningTotal += x.Item2;
-                        onTotalChange(x.Item1, x.Item2, runningTotal);
+                        if (x.Item2 != 0)
+                        {
+                            onTotalChange(x.Item1, x.Item2, runningTotal);
+                        }
                         return x;
                     })
                 .Sum(x => x.Item2).FirstAsync();

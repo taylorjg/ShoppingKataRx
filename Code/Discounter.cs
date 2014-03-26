@@ -11,29 +11,37 @@ namespace Code
             return sequenceOfItems.Select(item => DiscountItem(item, itemCounter));
         }
 
+        private static readonly Tuple<string, int> NoDiscount = Tuple.Create(string.Empty, 0);
+
         private static Tuple<string, int> DiscountItem(char item, ItemCounter itemCounter)
         {
-            var discount = 0;
-            var triggerQuantity = 0;
-
-            var newItemCount = itemCounter.IncrementItemCountForItem(item);
+            int discount;
+            int triggerQuantity;
 
             switch (item)
             {
                 case 'A':
                     triggerQuantity = 3;
-                    discount = (newItemCount % triggerQuantity == 0) ? -20 : 0;
+                    discount = 20;
                     break;
 
                 case 'B':
                     triggerQuantity = 2;
-                    discount = (newItemCount % triggerQuantity == 0) ? -15 : 0;
+                    discount = 15;
                     break;
+
+                default:
+                    return NoDiscount;
             }
 
-            var discountDescription = (discount != 0) ? string.Format("{0} '{1}'s", triggerQuantity, item) : string.Empty;
+            var newItemCount = itemCounter.IncrementItemCountForItem(item);
+            if (newItemCount % triggerQuantity == 0)
+            {
+                var discountDescription = (discount != 0) ? string.Format("{0} '{1}'s", triggerQuantity, item) : string.Empty;
+                return Tuple.Create(discountDescription, -discount);
+            }
 
-            return Tuple.Create(discountDescription, discount);
+            return NoDiscount;
         }
     }
 }
