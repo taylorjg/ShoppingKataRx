@@ -45,7 +45,7 @@ namespace App
         {
             using (new LogEntryExit("CreateSequenceOfItemsOverConsoleReadLoop"))
             {
-                return Observable.Create<char>(observer =>
+                var sequenceOfItems = Observable.Create<char>(observer =>
                 {
                     using (new LogEntryExit("Observable.Create()'s subscribe lambda"))
                     {
@@ -55,12 +55,24 @@ namespace App
                         return () => Log("Inside the subscription dispose action");
                     }
                 });
+                var connectableObservable = sequenceOfItems.Publish();
+                connectableObservable.Connect();
+                return connectableObservable;
             }
         }
 
         private static void ConsoleReadLoop(IObserver<char> observer)
         {
             using (new LogEntryExit("ConsoleReadLoop"))
+            {
+                var consoleReadLoopThread = new System.Threading.Thread(() => ConsoleReadLoopInner(observer));
+                consoleReadLoopThread.Start();
+            }
+        }
+
+        private static void ConsoleReadLoopInner(IObserver<char> observer)
+        {
+            using (new LogEntryExit("ConsoleReadLoopInner"))
             {
                 for (; ; )
                 {
