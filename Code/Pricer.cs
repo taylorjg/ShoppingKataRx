@@ -12,7 +12,7 @@ namespace Code
 
         private static int LookupPrice(char item)
         {
-            switch (Char.ToUpper(item))
+            switch (item)
             {
                 case 'A':
                     return 50;

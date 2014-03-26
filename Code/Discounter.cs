@@ -13,7 +13,7 @@ namespace Code
                     var discount = 0;
                     var newItemCount = itemCounter.IncrementItemCountForItem(item);
 
-                    switch (Char.ToUpper(item))
+                    switch (item)
                     {
                         case 'A':
                             discount = (newItemCount % 3 == 0) ? -20 : 0;
