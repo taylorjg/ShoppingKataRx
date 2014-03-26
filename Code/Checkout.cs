@@ -6,7 +6,7 @@ namespace Code
 {
     public class Checkout
     {
-        public Task<int> ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
+        public Task<int> ProcessSequenceOfItems(IObservable<char> sequenceOfItems, Action<string, int, int> onTotalChange = null)
         {
             var cleanedSequenceOfItems = sequenceOfItems
                 .Where(Char.IsLetter)
@@ -19,7 +19,7 @@ namespace Code
             var discounts = discounter.DiscountSequenceOfItems(cleanedSequenceOfItems);
 
             var totaller = new Totaller();
-            return totaller.TotalPricesAndDiscounts(prices, discounts);
+            return totaller.TotalPricesAndDiscounts(prices, discounts, onTotalChange ?? ((_1, _2, _3) => { }));
         }
     }
 }

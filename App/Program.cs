@@ -19,10 +19,19 @@ namespace App
                                       : CreateSequenceOfItemsOverConsoleReadLoop();
 
             var checkout = new Checkout();
-            var task = checkout.ProcessSequenceOfItems(sequenceOfItems);
+            var task = checkout.ProcessSequenceOfItems(sequenceOfItems, (item, totalDelta, runningTotal) =>
+                {
+                    if (totalDelta != 0)
+                    {
+                        Console.WriteLine("{0}\t{1,3:N0}\t{2,3:N0}", item, totalDelta, runningTotal);
+                    }
+                });
+
             task.Wait();
             var total = task.Result;
-            Console.WriteLine("Total = {0}.", total);
+
+            Console.WriteLine();
+            Console.WriteLine("Total = {0}", total);
         }
 
         private static IObservable<char> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
@@ -51,6 +60,13 @@ namespace App
         }
 
         private static void ConsoleReadLoop(IObserver<char> observer)
+        {
+            // ConsoleReadLoopInner(observer);
+            var thread = new System.Threading.Thread(() => ConsoleReadLoopInner(observer));
+            thread.Start();
+        }
+
+        private static void ConsoleReadLoopInner(IObserver<char> observer)
         {
             using (new LogEntryExit("ConsoleReadLoop"))
             {

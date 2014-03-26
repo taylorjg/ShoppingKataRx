@@ -6,9 +6,19 @@ namespace Code
 {
     public class Totaller
     {
-        public async Task<int> TotalPricesAndDiscounts(IObservable<int> prices, IObservable<int> discounts)
+        public async Task<int> TotalPricesAndDiscounts(IObservable<Tuple<string, int>> prices, IObservable<Tuple<string, int>> discounts, Action<string, int, int> onTotalChange)
         {
-            return await prices.Merge(discounts).Sum().FirstAsync();
+            var runningTotal = 0;
+
+            return await prices
+                .Merge(discounts)
+                .Select(x =>
+                    {
+                        runningTotal += x.Item2;
+                        onTotalChange(x.Item1, x.Item2, runningTotal);
+                        return x;
+                    })
+                .Sum(x => x.Item2).FirstAsync();
         }
     }
 }

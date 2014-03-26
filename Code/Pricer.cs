@@ -5,9 +5,9 @@ namespace Code
 {
     public class Pricer
     {
-        public IObservable<int> PriceSequenceOfItems(IObservable<char> sequenceOfItems)
+        public IObservable<Tuple<string, int>> PriceSequenceOfItems(IObservable<char> sequenceOfItems)
         {
-            return sequenceOfItems.Select(LookupPrice);
+            return sequenceOfItems.Select(x => Tuple.Create(string.Format("{0}", x), LookupPrice(x)));
         }
 
         private static int LookupPrice(char item)
@@ -22,9 +22,9 @@ namespace Code
                     return 20;
                 case 'D':
                     return 15;
+                default:
+                    throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
             }
-
-            throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
         }
     }
 }
