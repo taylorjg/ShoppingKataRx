@@ -18,8 +18,13 @@ namespace App
                                       ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
                                       : CreateSequenceOfItemsOverConsoleReadLoop();
 
+            Console.WriteLine();
+            Console.WriteLine("Item\tPrice\tRunning Total");
+            Console.WriteLine("----\t-----\t-------------");
+            Console.WriteLine();
+
             var checkout = new Checkout();
-            var task = checkout.ProcessSequenceOfItems(sequenceOfItems, (item, totalDelta, runningTotal) => Console.WriteLine("{0}\t{1,3:N0}\t{2,3:N0}", item, totalDelta, runningTotal));
+            var task = checkout.ProcessSequenceOfItems(sequenceOfItems, (item, totalDelta, runningTotal) => Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", item, totalDelta, runningTotal));
 
             task.Wait();
             var total = task.Result;
