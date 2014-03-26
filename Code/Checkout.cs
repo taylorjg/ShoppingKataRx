@@ -19,7 +19,7 @@ namespace Code
             var discounts = discounter.DiscountSequenceOfItems(cleanedSequenceOfItems);
 
             var totaller = new Totaller();
-            return totaller.TotalPricesAndDiscounts(prices, discounts, onTotalChange ?? ((_1, _2, _3) => { }));
+            return totaller.TotalPricesAndDiscounts(prices, discounts, onTotalChange ?? ((_, __, ___) => { }));
         }
     }
 }
