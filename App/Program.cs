@@ -65,14 +65,14 @@ namespace App
         {
             using (new LogEntryExit("ConsoleReadLoop"))
             {
-                var consoleReadLoopThread = new System.Threading.Thread(() => ConsoleReadLoopInner(observer));
+                var consoleReadLoopThread = new System.Threading.Thread(() => ConsoleReadLoopOnSeparateThread(observer));
                 consoleReadLoopThread.Start();
             }
         }
 
-        private static void ConsoleReadLoopInner(IObserver<char> observer)
+        private static void ConsoleReadLoopOnSeparateThread(IObserver<char> observer)
         {
-            using (new LogEntryExit("ConsoleReadLoopInner"))
+            using (new LogEntryExit("ConsoleReadLoopOnSeparateThread"))
             {
                 for (; ; )
                 {
