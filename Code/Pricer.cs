@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 
 namespace Code
@@ -10,20 +11,23 @@ namespace Code
             return sequenceOfItems.Select(x => Tuple.Create(string.Format("{0}", x), LookupPrice(x)));
         }
 
+        private static readonly IDictionary<char, int> PriceList = new Dictionary<char, int>
+            {
+                {'A', 50},
+                {'B', 30},
+                {'C', 20},
+                {'D', 15}
+            };
+
         private static int LookupPrice(char item)
         {
-            switch (item)
+            try
             {
-                case 'A':
-                    return 50;
-                case 'B':
-                    return 30;
-                case 'C':
-                    return 20;
-                case 'D':
-                    return 15;
-                default:
-                    throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
+                return PriceList[item];
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
             }
         }
     }
