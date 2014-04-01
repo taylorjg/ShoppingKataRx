@@ -12,14 +12,13 @@ namespace Code
 
             return await prices
                 .Merge(discounts)
-                .Select(x =>
+                .Do(x =>
                     {
                         runningTotal += x.Item2;
                         if (x.Item2 != 0)
                         {
                             onTotalChange(x.Item1, x.Item2, runningTotal);
                         }
-                        return x;
                     })
                 .Sum(x => x.Item2).FirstAsync();
         }
