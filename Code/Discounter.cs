@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 
 namespace Code
@@ -11,34 +12,25 @@ namespace Code
             return sequenceOfItems.Select(item => DiscountItem(item, itemCounter));
         }
 
+        private static readonly IDictionary<char, Tuple<int, string, int>> Discounts =
+            new Dictionary<char, Tuple<int, string, int>>
+                {
+                    {'A', Tuple.Create(3, "3 'A's", -20)},
+                    {'B', Tuple.Create(2, "2 'B's", -15)}
+                };
+
         private static readonly Tuple<string, int> NoDiscount = Tuple.Create(string.Empty, 0);
 
         private static Tuple<string, int> DiscountItem(char item, ItemCounter itemCounter)
         {
-            int triggerQuantity;
-            int discount;
-
-            switch (item)
+            if (Discounts.ContainsKey(item))
             {
-                case 'A':
-                    triggerQuantity = 3;
-                    discount = 20;
-                    break;
-
-                case 'B':
-                    triggerQuantity = 2;
-                    discount = 15;
-                    break;
-
-                default:
-                    return NoDiscount;
-            }
-
-            var newItemCount = itemCounter.IncrementItemCountForItem(item);
-            if (newItemCount % triggerQuantity == 0)
-            {
-                var discountDescription = string.Format("{0} '{1}'s", triggerQuantity, item);
-                return Tuple.Create(discountDescription, -discount);
+                var discount = Discounts[item];
+                var newItemCount = itemCounter.IncrementItemCountFor(item);
+                if (newItemCount % discount.Item1 == 0)
+                {
+                    return Tuple.Create(discount.Item2, discount.Item3);
+                }
             }
 
             return NoDiscount;

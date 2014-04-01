@@ -6,7 +6,7 @@ namespace Code
     {
         private readonly IDictionary<char, int> _itemCounts = new Dictionary<char, int>();
 
-        public int IncrementItemCountForItem(char item)
+        public int IncrementItemCountFor(char item)
         {
             var newItemCount = (_itemCounts.ContainsKey(item)) ? _itemCounts[item] : 0;
             newItemCount++;
