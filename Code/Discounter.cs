@@ -9,7 +9,9 @@ namespace Code
         public IObservable<Tuple<string, int>> DiscountSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var itemCounter = new ItemCounter();
-            return sequenceOfItems.Select(item => DiscountItem(item, itemCounter));
+            return sequenceOfItems
+                .Select(item => DiscountItem(item, itemCounter))
+                .Where(item => item.Item2 != 0);
         }
 
         private static readonly IDictionary<char, Tuple<int, string, int>> Discounts =

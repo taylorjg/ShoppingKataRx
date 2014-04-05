@@ -81,7 +81,7 @@ namespace App
                 {
                     Log("Calling Console.ReadLine()");
                     var line = Console.ReadLine();
-                    Log("...after await Console.ReadLine()");
+                    Log("...after Console.ReadLine()");
 
                     if (string.IsNullOrEmpty(line))
                     {

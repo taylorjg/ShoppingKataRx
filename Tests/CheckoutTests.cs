@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Code;
 using NUnit.Framework;
 
@@ -103,6 +105,31 @@ namespace Tests
 
             // Assert
             Assert.That(total, Is.EqualTo(expectedTotal));
+        }
+
+        [Test]
+        public void OnTotalChangeActionIsCalledCorrectly()
+        {
+            // Arrange
+            var sequenceOfItems = BuildSequenceOfItems("AABA");
+            var callbacks = new List<Tuple<string, int, int>>();
+
+            // Act
+            var checkout = new Checkout();
+            checkout
+                .ProcessSequenceOfItems(
+                    sequenceOfItems,
+                    (item, totalDelta, runningTotal) => callbacks.Add(Tuple.Create(item, totalDelta, runningTotal)))
+                .Wait();
+
+            // Assert
+            Assert.That(callbacks.Count, Is.EqualTo(5));
+            Assert.That(callbacks[0], Is.EqualTo(Tuple.Create("A", 50, 50)));
+            Assert.That(callbacks[1], Is.EqualTo(Tuple.Create("A", 50, 100)));
+            Assert.That(callbacks[2], Is.EqualTo(Tuple.Create("B", 30, 130)));
+            Assert.That(callbacks[3], Is.EqualTo(Tuple.Create("A", 50, 180)));
+            Assert.That(callbacks[4].Item2, Is.EqualTo(-20));
+            Assert.That(callbacks[4].Item3, Is.EqualTo(160));
         }
 
         private static IObservable<char> BuildSequenceOfItems(string itemsString)
