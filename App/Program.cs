@@ -29,7 +29,7 @@ namespace App
                 Console.WriteLine();
 
                 var onErrorEvent = new ManualResetEventSlim(false);
-                var onCompleteEvent = new ManualResetEventSlim(false);
+                var onCompletedEvent = new ManualResetEventSlim(false);
                 var total = 0;
 
                 var checkout = new Checkout();
@@ -43,13 +43,13 @@ namespace App
                             total = runningTotal;
                         },
                     _ => onErrorEvent.Set(),
-                    onCompleteEvent.Set);
+                    onCompletedEvent.Set);
 
                 Log("Before WaitHandle.WaitAny...");
                 WaitHandle.WaitAny(new[]
                     {
                         onErrorEvent.WaitHandle,
-                        onCompleteEvent.WaitHandle
+                        onCompletedEvent.WaitHandle
                     });
                 Log("...after WaitHandle.WaitAny...");
 
