@@ -78,7 +78,7 @@ namespace Tests
             checkout
                 .ProcessSequenceOfItems(
                     sequenceOfItems,
-                    (item, totalDelta, runningTotal) => callbacks.Add(Tuple.Create(item, totalDelta, runningTotal)))
+                    (description, value, runningTotal) => callbacks.Add(Tuple.Create(description, value, runningTotal)))
                 .Wait();
 
             // Assert
@@ -87,8 +87,7 @@ namespace Tests
             Assert.That(callbacks[1], Is.EqualTo(Tuple.Create("A", 50, 100)));
             Assert.That(callbacks[2], Is.EqualTo(Tuple.Create("B", 30, 130)));
             Assert.That(callbacks[3], Is.EqualTo(Tuple.Create("A", 50, 180)));
-            Assert.That(callbacks[4].Item2, Is.EqualTo(-20));
-            Assert.That(callbacks[4].Item3, Is.EqualTo(160));
+            Assert.That(callbacks[4], Is.EqualTo(Tuple.Create("3 'A's", -20, 160)));
         }
 
         private static void CommonTestImplementation(string items, int expectedTotal)

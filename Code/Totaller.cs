@@ -12,12 +12,16 @@ namespace Code
             IObservable<Tuple<string, int>> discounts,
             Action<string, int, int> onTotalChange)
         {
-            var runningTotal = 0;
-
             return prices
                 .Merge(discounts)
-                .Do(x => onTotalChange(x.Item1, x.Item2, runningTotal += x.Item2))
-                .Sum(x => x.Item2)
+                .Scan(0, (oldTotal, x) =>
+                    {
+                        var description = x.Item1;
+                        var value = x.Item2;
+                        var newTotal = oldTotal + value;
+                        onTotalChange(description, value, newTotal);
+                        return newTotal;
+                    })
                 .ToTask();
         }
     }
