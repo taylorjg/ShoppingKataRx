@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using Code;
 
 namespace App
@@ -18,10 +20,41 @@ namespace App
                 var listOfItemsFromCommandLine = args.FirstOrDefault(arg => !arg.StartsWith("-"));
                 var sequenceOfItems = (listOfItemsFromCommandLine != null)
                                           ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
-                                          : CreateSequenceOfItemsOverConsoleReadLoop();
+                                          : CreateSequenceOfItemsOverConsoleReadLoop()
+                                                .SubscribeOn(NewThreadScheduler.Default);
 
-                //Version1(sequenceOfItems);
-                Version2(sequenceOfItems);
+                Console.WriteLine();
+                Console.WriteLine("Item\tValue\tRunning Total");
+                Console.WriteLine("----\t-----\t-------------");
+                Console.WriteLine();
+
+                var onErrorEvent = new ManualResetEventSlim(false);
+                var onCompleteEvent = new ManualResetEventSlim(false);
+                var total = 0;
+
+                var checkout = new Checkout();
+                checkout.ProcessSequenceOfItems2(sequenceOfItems).Subscribe(
+                    x =>
+                        {
+                            var description = x.Item1;
+                            var value = x.Item2;
+                            var runningTotal = x.Item3;
+                            Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal);
+                            total = runningTotal;
+                        },
+                    _ => onErrorEvent.Set(),
+                    onCompleteEvent.Set);
+
+                Log("Before WaitHandle.WaitAny...");
+                WaitHandle.WaitAny(new[]
+                    {
+                        onErrorEvent.WaitHandle,
+                        onCompleteEvent.WaitHandle
+                    });
+                Log("...after WaitHandle.WaitAny...");
+
+                Console.WriteLine();
+                Console.WriteLine("Total = {0}", total);
             }
             catch (Exception ex)
             {
@@ -33,49 +66,6 @@ namespace App
                 Console.Error.WriteLine(ex.Message);
                 Environment.Exit(1);
             }
-        }
-
-        private static void Version1(IObservable<char> sequenceOfItems)
-        {
-            Console.WriteLine();
-            Console.WriteLine("Item\tValue\tRunning Total");
-            Console.WriteLine("----\t-----\t-------------");
-            Console.WriteLine();
-
-            var checkout = new Checkout();
-            var task = checkout.ProcessSequenceOfItems(
-                sequenceOfItems,
-                (description, value, runningTotal) =>
-                Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal));
-
-            task.Wait();
-            var total = task.Result;
-
-            Console.WriteLine();
-            Console.WriteLine("Total = {0}", total);
-        }
-
-        private static void Version2(IObservable<char> sequenceOfItems)
-        {
-            Console.WriteLine();
-            Console.WriteLine("Item\tValue\tRunning Total");
-            Console.WriteLine("----\t-----\t-------------");
-            Console.WriteLine();
-
-            var total = 0;
-
-            var checkout = new Checkout();
-            checkout.ProcessSequenceOfItems2(sequenceOfItems).Subscribe(x =>
-            {
-                var description = x.Item1;
-                var value = x.Item2;
-                var runningTotal = x.Item3;
-                Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal);
-                total = runningTotal;
-            });
-
-            Console.WriteLine();
-            Console.WriteLine("Total = {0}", total);
         }
 
         private static IObservable<char> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
@@ -94,33 +84,18 @@ namespace App
                 {
                     using (new LogEntryExit("Observable.Create()'s subscribe lambda"))
                     {
-                        Log("Calling ConsoleReadLoop()...");
                         ConsoleReadLoop(observer);
-                        Log("...returned from ConsoleReadLoop()");
                         return () => Log("Inside the subscription dispose action");
                     }
                 });
-                var connectableObservable = sequenceOfItems.Publish();
-                connectableObservable.Connect();
-                return connectableObservable;
+
+                return sequenceOfItems;
             }
         }
 
         private static void ConsoleReadLoop(IObserver<char> observer)
         {
             using (new LogEntryExit("ConsoleReadLoop"))
-            {
-                var consoleReadLoopThread = new System.Threading.Thread(() => ConsoleReadLoopOnSeparateThread(observer))
-                    {
-                        Name = "ReadConsole"
-                    };
-                consoleReadLoopThread.Start();
-            }
-        }
-
-        private static void ConsoleReadLoopOnSeparateThread(IObserver<char> observer)
-        {
-            using (new LogEntryExit("ConsoleReadLoopOnSeparateThread"))
             {
                 for (; ; )
                 {

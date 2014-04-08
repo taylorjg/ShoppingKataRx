@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Threading;
 using Code;
 using NUnit.Framework;
 
@@ -9,7 +10,7 @@ namespace Tests
     [TestFixture]
     internal class CheckoutTests
     {
-        [Test, Ignore]
+        [Test]
         public void NoItemsGivesATotalOfZero()
         {
             CommonTestImplementation("", 0);
@@ -103,9 +104,12 @@ namespace Tests
 
             // Act
             var checkout = new Checkout();
-            var task = checkout.ProcessSequenceOfItems(sequenceOfItems);
-            task.Wait();
-            var total = task.Result;
+            var outputSequence = checkout.ProcessSequenceOfItems2(sequenceOfItems);
+            var onErrorEvent = new ManualResetEventSlim(false);
+            var onCompletedEvent = new ManualResetEventSlim(false);
+            var total = 0;
+            outputSequence.Subscribe(x => total = x.Item3, _ => onErrorEvent.Set(), onCompletedEvent.Set);
+            WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle});
 
             // Assert
             Assert.That(total, Is.EqualTo(expectedTotal));

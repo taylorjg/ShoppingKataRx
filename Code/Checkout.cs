@@ -24,15 +24,17 @@ namespace Code
 
         public IObservable<Tuple<string, int, int>> ProcessSequenceOfItems2(IObservable<char> sequenceOfItems)
         {
-            var cleanedSequenceOfItems = sequenceOfItems
+            var cleanedHotSequenceOfItems = sequenceOfItems
                 .Where(Char.IsLetter)
-                .Select(Char.ToUpper);
+                .Select(Char.ToUpper)
+                .Publish()
+                .RefCount();
 
             var pricer = new Pricer();
-            var prices = pricer.PriceSequenceOfItems(cleanedSequenceOfItems);
+            var prices = pricer.PriceSequenceOfItems(cleanedHotSequenceOfItems);
 
             var discounter = new Discounter();
-            var discounts = discounter.DiscountSequenceOfItems(cleanedSequenceOfItems);
+            var discounts = discounter.DiscountSequenceOfItems(cleanedHotSequenceOfItems);
 
             var totaller = new Totaller();
             return totaller.TotalPricesAndDiscounts2(prices, discounts);
