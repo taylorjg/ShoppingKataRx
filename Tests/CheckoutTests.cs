@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using Code;
 using NUnit.Framework;
@@ -99,17 +100,48 @@ namespace Tests
 
         private static void CommonTestImplementationForCalculatedTotal(string items, int expectedTotal)
         {
+            CommonTestImplementationForCalculatedTotalWaitingOnEvents(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotalWaitingOnATask(items, expectedTotal);
+        }
+
+        private static void CommonTestImplementationForCalculatedTotalWaitingOnEvents(string items, int expectedTotal)
+        {
             // Arrange
             var inputSequence = CreateInputSequenceOfItems(items);
+            var total = 0;
 
             // Act
             var onErrorEvent = new ManualResetEventSlim(false);
             var onCompletedEvent = new ManualResetEventSlim(false);
-            var total = 0;
             var checkout = new Checkout();
             var outputSequence = checkout.ProcessSequenceOfItems(inputSequence);
             outputSequence.Subscribe(x => total = x.Item3, _ => onErrorEvent.Set(), onCompletedEvent.Set);
-            WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle});
+            var waitResultIndex = WaitHandle.WaitAny(new[]
+                {
+                    onErrorEvent.WaitHandle, // index 0
+                    onCompletedEvent.WaitHandle // index 1
+                });
+
+            // Assert
+            Assert.That(waitResultIndex, Is.EqualTo(1));
+            Assert.That(total, Is.EqualTo(expectedTotal));
+        }
+
+        private static void CommonTestImplementationForCalculatedTotalWaitingOnATask(string items, int expectedTotal)
+        {
+            // Arrange
+            var inputSequence = CreateInputSequenceOfItems(items);
+            var total = 0;
+
+            // Act
+            var checkout = new Checkout();
+            var outputSequence = checkout.ProcessSequenceOfItems(inputSequence);
+            var task = outputSequence.LastOrDefaultAsync().ToTask();
+            task.Wait();
+            if (task.Result != null)
+            {
+                total = task.Result.Item3;
+            }
 
             // Assert
             Assert.That(total, Is.EqualTo(expectedTotal));
