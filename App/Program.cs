@@ -131,7 +131,7 @@ namespace App
             if (_enableLogging)
             {
                 var formattedMessage = string.Format(format, args);
-                var managedThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                var managedThreadId = Thread.CurrentThread.ManagedThreadId;
                 Console.WriteLine("[{0,5:N0}] {1}", managedThreadId, formattedMessage);
             }
         }

@@ -13,7 +13,7 @@ namespace Tests
         [Test]
         public void NoItemsGivesATotalOfZero()
         {
-            CommonTestImplementation("", 0);
+            CommonTestImplementationForCalculatedTotal("", 0);
         }
 
         [TestCase("A", 50)]
@@ -26,7 +26,7 @@ namespace Tests
         [TestCase("d", 15)]
         public void SingleItemHasTheCorrectPrice(string items, int expectedTotal)
         {
-            CommonTestImplementation(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotal(items, expectedTotal);
         }
 
         [TestCase("AAA", 150 - 20)]
@@ -37,7 +37,7 @@ namespace Tests
         [TestCase("bB", 60 - 15)]
         public void OneDiscountIsAppliedWhenGivenOneTriggerQuantity(string items, int expectedTotal)
         {
-            CommonTestImplementation(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotal(items, expectedTotal);
         }
 
         [TestCase("AAAAAA", (150 - 20) * 2)]
@@ -48,7 +48,7 @@ namespace Tests
         [TestCase("bb BB", (60 - 15) * 2)]
         public void MultipleDiscountsAreAppliedWhenGivenMultipleTriggerQuantities(string items, int expectedTotal)
         {
-            CommonTestImplementation(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotal(items, expectedTotal);
         }
 
         [TestCase("AAABB", (150 - 20) + (60 - 15))]
@@ -57,7 +57,7 @@ namespace Tests
         [TestCase("aaa BB", (150 - 20) + (60 - 15))]
         public void MultipleDifferentDiscountsAreAppliedWhenGivenMultipleDifferentTriggerQuantities(string items, int expectedTotal)
         {
-            CommonTestImplementation(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotal(items, expectedTotal);
         }
 
         [TestCase("AAAA", (150 - 20) + 50)]
@@ -70,44 +70,44 @@ namespace Tests
         [TestCase("bb B", (60 - 15) + 30)]
         public void OneDiscountIsAppliedWhenGivenOneTriggerQuantityPlusOne(string items, int expectedTotal)
         {
-            CommonTestImplementation(items, expectedTotal);
+            CommonTestImplementationForCalculatedTotal(items, expectedTotal);
         }
 
         [Test]
-        public void OnTotalChangeActionIsCalledCorrectly()
+        public void OutputSequenceItemsAreCorrect()
         {
             // Arrange
-            var sequenceOfItems = CreateSequenceOfItems("AABA");
-            var callbacks = new List<Tuple<string, int, int>>();
+            var inputSequence = CreateInputSequenceOfItems("AABA");
+            var outputSequenceItems = new List<Tuple<string, int, int>>();
 
             // Act
+            var onErrorEvent = new ManualResetEventSlim(false);
+            var onCompletedEvent = new ManualResetEventSlim(false);
             var checkout = new Checkout();
-            checkout
-                .ProcessSequenceOfItems(
-                    sequenceOfItems,
-                    (description, value, runningTotal) => callbacks.Add(Tuple.Create(description, value, runningTotal)))
-                .Wait();
+            var outputSequence = checkout.ProcessSequenceOfItems2(inputSequence);
+            outputSequence.Subscribe(outputSequenceItems.Add, _ => onErrorEvent.Set(), onCompletedEvent.Set);
+            WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle });
 
             // Assert
-            Assert.That(callbacks.Count, Is.EqualTo(5));
-            Assert.That(callbacks[0], Is.EqualTo(Tuple.Create("A", 50, 50)));
-            Assert.That(callbacks[1], Is.EqualTo(Tuple.Create("A", 50, 100)));
-            Assert.That(callbacks[2], Is.EqualTo(Tuple.Create("B", 30, 130)));
-            Assert.That(callbacks[3], Is.EqualTo(Tuple.Create("A", 50, 180)));
-            Assert.That(callbacks[4], Is.EqualTo(Tuple.Create("3 'A's", -20, 160)));
+            Assert.That(outputSequenceItems.Count, Is.EqualTo(5));
+            Assert.That(outputSequenceItems[0], Is.EqualTo(Tuple.Create("A", 50, 50)));
+            Assert.That(outputSequenceItems[1], Is.EqualTo(Tuple.Create("A", 50, 100)));
+            Assert.That(outputSequenceItems[2], Is.EqualTo(Tuple.Create("B", 30, 130)));
+            Assert.That(outputSequenceItems[3], Is.EqualTo(Tuple.Create("A", 50, 180)));
+            Assert.That(outputSequenceItems[4], Is.EqualTo(Tuple.Create("3 'A's", -20, 160)));
         }
 
-        private static void CommonTestImplementation(string items, int expectedTotal)
+        private static void CommonTestImplementationForCalculatedTotal(string items, int expectedTotal)
         {
             // Arrange
-            var sequenceOfItems = CreateSequenceOfItems(items);
+            var inputSequence = CreateInputSequenceOfItems(items);
 
             // Act
-            var checkout = new Checkout();
-            var outputSequence = checkout.ProcessSequenceOfItems2(sequenceOfItems);
             var onErrorEvent = new ManualResetEventSlim(false);
             var onCompletedEvent = new ManualResetEventSlim(false);
             var total = 0;
+            var checkout = new Checkout();
+            var outputSequence = checkout.ProcessSequenceOfItems2(inputSequence);
             outputSequence.Subscribe(x => total = x.Item3, _ => onErrorEvent.Set(), onCompletedEvent.Set);
             WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle});
 
@@ -115,7 +115,7 @@ namespace Tests
             Assert.That(total, Is.EqualTo(expectedTotal));
         }
 
-        private static IObservable<char> CreateSequenceOfItems(string items)
+        private static IObservable<char> CreateInputSequenceOfItems(string items)
         {
             return items.ToObservable();
         }
