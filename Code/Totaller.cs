@@ -18,7 +18,6 @@ namespace Code
                 .Merge(discounts)
                 .Do(x => onTotalChange(x.Item1, x.Item2, runningTotal += x.Item2))
                 .Sum(x => x.Item2)
-                .FirstAsync()
                 .ToTask();
         }
     }
