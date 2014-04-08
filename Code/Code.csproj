@@ -59,6 +59,7 @@
     <Compile Include="Pricer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Totaller.cs" />
+    <Compile Include="UnknownBasketItemException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -27,7 +27,8 @@ namespace Code
             }
             catch (KeyNotFoundException)
             {
-                throw new InvalidOperationException(string.Format("Unrecognised basket item, '{0}'.", item));
+                // TODO: decide how best to handle unknown basket items. For now, just throw an exception.
+                throw new UnknownBasketItemException(item);
             }
         }
     }

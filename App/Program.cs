@@ -11,26 +11,42 @@ namespace App
 
         private static void Main(string[] args)
         {
-            _enableLogging = (args.LastOrDefault(arg => arg == "-log") != null);
+            try
+            {
+                _enableLogging = (args.LastOrDefault(arg => arg == "-log") != null);
 
-            var listOfItemsFromCommandLine = args.FirstOrDefault(arg => !arg.StartsWith("-"));
-            var sequenceOfItems = (listOfItemsFromCommandLine != null)
-                                      ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
-                                      : CreateSequenceOfItemsOverConsoleReadLoop();
+                var listOfItemsFromCommandLine = args.FirstOrDefault(arg => !arg.StartsWith("-"));
+                var sequenceOfItems = (listOfItemsFromCommandLine != null)
+                                          ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
+                                          : CreateSequenceOfItemsOverConsoleReadLoop();
 
-            Console.WriteLine();
-            Console.WriteLine("Item\tPrice\tRunning Total");
-            Console.WriteLine("----\t-----\t-------------");
-            Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("Item\tPrice\tRunning Total");
+                Console.WriteLine("----\t-----\t-------------");
+                Console.WriteLine();
 
-            var checkout = new Checkout();
-            var task = checkout.ProcessSequenceOfItems(sequenceOfItems, (item, totalDelta, runningTotal) => Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", item, totalDelta, runningTotal));
+                var checkout = new Checkout();
+                var task = checkout.ProcessSequenceOfItems(
+                    sequenceOfItems,
+                    (item, totalDelta, runningTotal) =>
+                    Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", item, totalDelta, runningTotal));
 
-            task.Wait();
-            var total = task.Result;
+                task.Wait();
+                var total = task.Result;
 
-            Console.WriteLine();
-            Console.WriteLine("Total = {0}", total);
+                Console.WriteLine();
+                Console.WriteLine("Total = {0}", total);
+            }
+            catch (Exception ex)
+            {
+                ex = ex.InnerException ?? ex;
+                if (!(ex is UnknownBasketItemException))
+                {
+                    throw;
+                }
+                Console.Error.WriteLine(ex.Message);
+                Environment.Exit(1);
+            }
         }
 
         private static IObservable<char> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)

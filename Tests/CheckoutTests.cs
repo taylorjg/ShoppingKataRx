@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Code;
 using NUnit.Framework;
 
@@ -18,17 +17,9 @@ namespace Tests
         [TestCase("b", 30)]
         [TestCase("c", 20)]
         [TestCase("d", 15)]
-        public async void SingleItemHasTheCorrectPrice(string itemsString, int expectedTotal)
+        public void SingleItemHasTheCorrectPrice(string items, int expectedTotal)
         {
-            // Arrange
-            var sequenceOfItems = BuildSequenceOfItems(itemsString);
-
-            // Act
-            var checkout = new Checkout();
-            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
-
-            // Assert
-            Assert.That(total, Is.EqualTo(expectedTotal));
+            CommonTestImplementation(items, expectedTotal);
         }
 
         [TestCase("AAA", 150 - 20)]
@@ -37,17 +28,9 @@ namespace Tests
         [TestCase("BB", 60 - 15)]
         [TestCase("bb", 60 - 15)]
         [TestCase("bB", 60 - 15)]
-        public async void OneDiscountIsAppliedWhenGivenOneTriggerQuantity(string itemsString, int expectedTotal)
+        public void OneDiscountIsAppliedWhenGivenOneTriggerQuantity(string items, int expectedTotal)
         {
-            // Arrange
-            var sequenceOfItems = BuildSequenceOfItems(itemsString);
-
-            // Act
-            var checkout = new Checkout();
-            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
-
-            // Assert
-            Assert.That(total, Is.EqualTo(expectedTotal));
+            CommonTestImplementation(items, expectedTotal);
         }
 
         [TestCase("AAAAAA", (150 - 20) * 2)]
@@ -56,34 +39,18 @@ namespace Tests
         [TestCase("BBBB", (60 - 15) * 2)]
         [TestCase("BB BB", (60 - 15) * 2)]
         [TestCase("bb BB", (60 - 15) * 2)]
-        public async void MultipleDiscountsAreAppliedWhenGivenMultipleTriggerQuantities(string itemsString, int expectedTotal)
+        public void MultipleDiscountsAreAppliedWhenGivenMultipleTriggerQuantities(string items, int expectedTotal)
         {
-            // Arrange
-            var sequenceOfItems = BuildSequenceOfItems(itemsString);
-
-            // Act
-            var checkout = new Checkout();
-            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
-
-            // Assert
-            Assert.That(total, Is.EqualTo(expectedTotal));
+            CommonTestImplementation(items, expectedTotal);
         }
 
         [TestCase("AAABB", (150 - 20) + (60 - 15))]
         [TestCase("AAA BB", (150 - 20) + (60 - 15))]
         [TestCase("aaa bb", (150 - 20) + (60 - 15))]
         [TestCase("aaa BB", (150 - 20) + (60 - 15))]
-        public async void MultipleDifferentDiscountsAreAppliedWhenGivenMultipleDifferentTriggerQuantities(string itemsString, int expectedTotal)
+        public void MultipleDifferentDiscountsAreAppliedWhenGivenMultipleDifferentTriggerQuantities(string items, int expectedTotal)
         {
-            // Arrange
-            var sequenceOfItems = BuildSequenceOfItems(itemsString);
-
-            // Act
-            var checkout = new Checkout();
-            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
-
-            // Assert
-            Assert.That(total, Is.EqualTo(expectedTotal));
+            CommonTestImplementation(items, expectedTotal);
         }
 
         [TestCase("AAAA", (150 - 20) + 50)]
@@ -94,24 +61,16 @@ namespace Tests
         [TestCase("BB B", (60 - 15) + 30)]
         [TestCase("bb b", (60 - 15) + 30)]
         [TestCase("bb B", (60 - 15) + 30)]
-        public async void OneDiscountIsAppliedWhenGivenOneTriggerQuantityPlusOne(string itemsString, int expectedTotal)
+        public void OneDiscountIsAppliedWhenGivenOneTriggerQuantityPlusOne(string items, int expectedTotal)
         {
-            // Arrange
-            var sequenceOfItems = BuildSequenceOfItems(itemsString);
-
-            // Act
-            var checkout = new Checkout();
-            var total = await checkout.ProcessSequenceOfItems(sequenceOfItems);
-
-            // Assert
-            Assert.That(total, Is.EqualTo(expectedTotal));
+            CommonTestImplementation(items, expectedTotal);
         }
 
         [Test]
         public void OnTotalChangeActionIsCalledCorrectly()
         {
             // Arrange
-            var sequenceOfItems = BuildSequenceOfItems("AABA");
+            var sequenceOfItems = CreateSequenceOfItems("AABA");
             var callbacks = new List<Tuple<string, int, int>>();
 
             // Act
@@ -132,9 +91,24 @@ namespace Tests
             Assert.That(callbacks[4].Item3, Is.EqualTo(160));
         }
 
-        private static IObservable<char> BuildSequenceOfItems(string itemsString)
+        private static void CommonTestImplementation(string items, int expectedTotal)
         {
-            return itemsString.ToObservable();
+            // Arrange
+            var sequenceOfItems = CreateSequenceOfItems(items);
+
+            // Act
+            var checkout = new Checkout();
+            var task = checkout.ProcessSequenceOfItems(sequenceOfItems);
+            task.Wait();
+            var total = task.Result;
+
+            // Assert
+            Assert.That(total, Is.EqualTo(expectedTotal));
+        }
+
+        private static IObservable<char> CreateSequenceOfItems(string items)
+        {
+            return items.ToObservable();
         }
     }
 }
