@@ -5,7 +5,7 @@ namespace Code
 {
     public class Totaller
     {
-        public IObservable<Tuple<string, int, int>> TotalPricesAndDiscounts2(
+        public IObservable<Tuple<string, int, int>> TotalPricesAndDiscounts(
             IObservable<Tuple<string, int>> prices,
             IObservable<Tuple<string, int>> discounts)
         {

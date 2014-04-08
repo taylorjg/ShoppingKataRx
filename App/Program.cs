@@ -33,7 +33,7 @@ namespace App
                 var total = 0;
 
                 var checkout = new Checkout();
-                checkout.ProcessSequenceOfItems2(sequenceOfItems).Subscribe(
+                checkout.ProcessSequenceOfItems(sequenceOfItems).Subscribe(
                     x =>
                         {
                             var description = x.Item1;

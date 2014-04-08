@@ -84,7 +84,7 @@ namespace Tests
             var onErrorEvent = new ManualResetEventSlim(false);
             var onCompletedEvent = new ManualResetEventSlim(false);
             var checkout = new Checkout();
-            var outputSequence = checkout.ProcessSequenceOfItems2(inputSequence);
+            var outputSequence = checkout.ProcessSequenceOfItems(inputSequence);
             outputSequence.Subscribe(outputSequenceItems.Add, _ => onErrorEvent.Set(), onCompletedEvent.Set);
             WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle });
 
@@ -107,7 +107,7 @@ namespace Tests
             var onCompletedEvent = new ManualResetEventSlim(false);
             var total = 0;
             var checkout = new Checkout();
-            var outputSequence = checkout.ProcessSequenceOfItems2(inputSequence);
+            var outputSequence = checkout.ProcessSequenceOfItems(inputSequence);
             outputSequence.Subscribe(x => total = x.Item3, _ => onErrorEvent.Set(), onCompletedEvent.Set);
             WaitHandle.WaitAny(new[] { onErrorEvent.WaitHandle, onCompletedEvent.WaitHandle});
 

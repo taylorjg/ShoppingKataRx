@@ -5,7 +5,7 @@ namespace Code
 {
     public class Checkout
     {
-        public IObservable<Tuple<string, int, int>> ProcessSequenceOfItems2(IObservable<char> sequenceOfItems)
+        public IObservable<Tuple<string, int, int>> ProcessSequenceOfItems(IObservable<char> sequenceOfItems)
         {
             var cleanedHotSequenceOfItems = sequenceOfItems
                 .Where(Char.IsLetter)
@@ -20,7 +20,7 @@ namespace Code
             var discounts = discounter.DiscountSequenceOfItems(cleanedHotSequenceOfItems);
 
             var totaller = new Totaller();
-            return totaller.TotalPricesAndDiscounts2(prices, discounts);
+            return totaller.TotalPricesAndDiscounts(prices, discounts);
         }
     }
 }
