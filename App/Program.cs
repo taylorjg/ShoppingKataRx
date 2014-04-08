@@ -20,22 +20,8 @@ namespace App
                                           ? CreateSequenceOfItemsOverCommandLineArgument(listOfItemsFromCommandLine)
                                           : CreateSequenceOfItemsOverConsoleReadLoop();
 
-                Console.WriteLine();
-                Console.WriteLine("Item\tValue\tRunning Total");
-                Console.WriteLine("----\t-----\t-------------");
-                Console.WriteLine();
-
-                var checkout = new Checkout();
-                var task = checkout.ProcessSequenceOfItems(
-                    sequenceOfItems,
-                    (description, value, runningTotal) =>
-                    Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal));
-
-                task.Wait();
-                var total = task.Result;
-
-                Console.WriteLine();
-                Console.WriteLine("Total = {0}", total);
+                //Version1(sequenceOfItems);
+                Version2(sequenceOfItems);
             }
             catch (Exception ex)
             {
@@ -47,6 +33,49 @@ namespace App
                 Console.Error.WriteLine(ex.Message);
                 Environment.Exit(1);
             }
+        }
+
+        private static void Version1(IObservable<char> sequenceOfItems)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Item\tValue\tRunning Total");
+            Console.WriteLine("----\t-----\t-------------");
+            Console.WriteLine();
+
+            var checkout = new Checkout();
+            var task = checkout.ProcessSequenceOfItems(
+                sequenceOfItems,
+                (description, value, runningTotal) =>
+                Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal));
+
+            task.Wait();
+            var total = task.Result;
+
+            Console.WriteLine();
+            Console.WriteLine("Total = {0}", total);
+        }
+
+        private static void Version2(IObservable<char> sequenceOfItems)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Item\tValue\tRunning Total");
+            Console.WriteLine("----\t-----\t-------------");
+            Console.WriteLine();
+
+            var total = 0;
+
+            var checkout = new Checkout();
+            checkout.ProcessSequenceOfItems2(sequenceOfItems).Subscribe(x =>
+            {
+                var description = x.Item1;
+                var value = x.Item2;
+                var runningTotal = x.Item3;
+                Console.WriteLine("{0}\t{1,5:N0}\t{2,13:N0}", description, value, runningTotal);
+                total = runningTotal;
+            });
+
+            Console.WriteLine();
+            Console.WriteLine("Total = {0}", total);
         }
 
         private static IObservable<char> CreateSequenceOfItemsOverCommandLineArgument(string listOfItemsFromCommandLine)
@@ -126,7 +155,9 @@ namespace App
         {
             if (_enableLogging)
             {
-                Console.WriteLine(format, args);
+                var formattedMessage = string.Format(format, args);
+                var managedThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                Console.WriteLine("[{0,5:N0}] {1}", managedThreadId, formattedMessage);
             }
         }
 

@@ -21,5 +21,21 @@ namespace Code
             var totaller = new Totaller();
             return totaller.TotalPricesAndDiscounts(prices, discounts, onTotalChange ?? ((_, __, ___) => { }));
         }
+
+        public IObservable<Tuple<string, int, int>> ProcessSequenceOfItems2(IObservable<char> sequenceOfItems)
+        {
+            var cleanedSequenceOfItems = sequenceOfItems
+                .Where(Char.IsLetter)
+                .Select(Char.ToUpper);
+
+            var pricer = new Pricer();
+            var prices = pricer.PriceSequenceOfItems(cleanedSequenceOfItems);
+
+            var discounter = new Discounter();
+            var discounts = discounter.DiscountSequenceOfItems(cleanedSequenceOfItems);
+
+            var totaller = new Totaller();
+            return totaller.TotalPricesAndDiscounts2(prices, discounts);
+        }
     }
 }

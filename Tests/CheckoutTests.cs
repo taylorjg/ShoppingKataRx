@@ -9,6 +9,12 @@ namespace Tests
     [TestFixture]
     internal class CheckoutTests
     {
+        [Test, Ignore]
+        public void NoItemsGivesATotalOfZero()
+        {
+            CommonTestImplementation("", 0);
+        }
+
         [TestCase("A", 50)]
         [TestCase("B", 30)]
         [TestCase("C", 20)]
